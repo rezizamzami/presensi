@@ -1,0 +1,32 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+      - name: Pasang PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Pasang Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pasang dependensi PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Siapkan konfigurasi
+        run: cp .env.example .env && php artisan key:generate
+      - name: Cek gaya kode
+        run: ./vendor/bin/pint --test
+      - name: Jalankan tes
+        run: php artisan test
+      - name: Build aset
+        run: npm install && npm run build
